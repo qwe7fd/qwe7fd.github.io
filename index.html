@@ -13981,19 +13981,42 @@
             );
         }
 
+        formatPrice(price) {
+            // Добавляем проверку на число
+            if (typeof price !== 'number') {
+                return 'Цена не указана';
+            }
+            return price.toLocaleString('ru-RU', { 
+                style: 'currency', 
+                currency: 'RUB', 
+                minimumFractionDigits: 0 
+            });
+        }
+
         generateSalesHistoryHTML(modelName, car) {
+            // Добавляем проверку наличия данных
+            if (!car) {
+                return '<p>Данные об автомобиле не найдены</p>';
+            }
+
             let html = `
                 <h2>Результаты поиска: ${modelName}</h2>
-                <p><strong>Средняя цена:</strong> ${this.car.averagePrice}</p>
+                <p><strong>Средняя цена:</strong> ${this.formatPrice(car.averagePrice || 0)}</p>
                 <h3>История продаж:</h3>
             `;
+
+            // Проверяем наличие истории продаж
+            if (!car.sellHistory || car.sellHistory.length === 0) {
+                html += '<p>История продаж отсутствует</p>';
+                return html;
+            }
 
             car.sellHistory.forEach((sale, index) => {
                 html += `
                     <div class="sale-record">
-                        <p><strong>Дата: ${sale.sellDate}</strong></p>
-                        <p>Количество: ${sale.sellCount}</p>
-                        <p>Средняя цена: ${this.formatPrice(sale.sellPrice)}</p>
+                        <p><strong>Дата: ${sale.sellDate || 'Не указана'}</strong></p>
+                        <p>Количество: ${sale.sellCount || 0}</p>
+                        <p>Цена: ${this.formatPrice(sale.sellPrice || 0)}</p>
                     </div>
                 `;
             });
